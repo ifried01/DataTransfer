@@ -61,13 +61,13 @@ class BRONCHDepthDataset(BRONCHDataset):
         super(BRONCHDepthDataset, self).__init__(*args, **kwargs)
 
     def get_image_path(self, folder, frame_index, side):
-        f_str = "{:010d}{}".format(frame_index, self.img_ext)
-        image_path = os.path.join(self.data_path, folder, "image_0{}/data".format(self.side_map[side]), f_str)
+        image_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "photo-{}-{}{}".format(side, frame_index, self.img_ext))
         return image_path
 
     def get_depth(self, folder, frame_index, side, do_flip):
-        f_str = "{:010d}.png".format(frame_index)
-        depth_path = os.path.join(self.data_path, folder, "DepthPhotos/groundtruth/image_0{}".format(self.side_map[side]), f_str)
+        # f_str = "{:010d}.png".format(frame_index)
+        # depth_path = os.path.join(self.data_path, "DepthPhotos", folder, "DepthPhotos/groundtruth/image_0{}".format(self.side_map[side]), f_str)
+        depth_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "photo-{}-{}{}".format(side, frame_index, self.img_ext))
         depth_gt = pil.open(depth_path)
         depth_gt = depth_gt.resize(self.full_res_shape, pil.NEAREST)
         depth_gt = np.array(depth_gt).astype(np.float32) / 256

@@ -41,6 +41,7 @@ class MonoDataset(data.Dataset):
     """
     def __init__(self,
                  data_path,
+                 foldername,
                  filenames,
                  height,
                  width,
@@ -51,6 +52,7 @@ class MonoDataset(data.Dataset):
         super(MonoDataset, self).__init__()
 
         self.data_path = data_path
+        self.foldername = foldername
         self.filenames = filenames
         self.height = height
         self.width = width
@@ -141,18 +143,18 @@ class MonoDataset(data.Dataset):
         do_color_aug = self.is_train and random.random() > 0.5
         do_flip = self.is_train and random.random() > 0.5
 
-        line = self.filenames[index].split()
-        folder = line[0]
+        line = self.filenames[index].rstrip(".jpg").split("-")
+        folder = self.foldername
 
         if len(line) == 3:
-            frame_index = int(line[1])
+            side = line[1]
         else:
-            frame_index = 0
+            side = 0
 
         if len(line) == 3:
-            side = line[2]
+            frame_index = int(line[2])
         else:
-            side = None
+            frame_index = None
 
         for i in self.frame_idxs:
             # stereo
