@@ -166,8 +166,10 @@ class MonoDataset(data.Dataset):
             # stereo
             # uses left/right image pairs
             # gets appended to frame_idxs in trainer.py
+            i = 0
             inputs[("color", i, -1)] = self.get_color(folder, frame_index, side, do_flip)
             # read other correspondong image
+            i = "s"
             other_side = {"r": "l", "l": "r"}[side]
             inputs[("color", i, -1)] = self.get_color(folder, frame_index, other_side, do_flip)
         # original code
