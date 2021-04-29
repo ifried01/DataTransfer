@@ -201,8 +201,6 @@ class Trainer:
 
         for batch_idx, inputs in enumerate(self.train_loader):
 
-            print(self.step)
-
             before_op_time = time.time()
 
             outputs, losses = self.process_batch(inputs)
@@ -228,7 +226,7 @@ class Trainer:
 
             self.step += 1
 
-            if self.step % 500 == 0:
+            if self.step % 100 == 0:
                 print("Processed {} steps".format(self.step))
 
     def process_batch(self, inputs):
