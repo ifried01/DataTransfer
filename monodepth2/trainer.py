@@ -196,7 +196,7 @@ class Trainer:
         """
         self.model_lr_scheduler.step()
 
-        print("Training")
+        print("Training Epoch: {}".format(self.epoch))
         self.set_train()
 
         for batch_idx, inputs in enumerate(self.train_loader):
@@ -225,6 +225,9 @@ class Trainer:
                 self.val()
 
             self.step += 1
+
+            if self.step % 500 == 0:
+                print("Processed {} steps".format(self.step))
 
     def process_batch(self, inputs):
         """Pass a minibatch through the network and generate images and losses
