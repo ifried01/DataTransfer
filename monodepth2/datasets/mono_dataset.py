@@ -156,10 +156,9 @@ class MonoDataset(data.Dataset):
         else:
             frame_index = None
 
-        print("Index: {}".format(index))
-        print("line: {}".format(line))
-        print("Frame Index: {}".format(frame_index))
-
+        # print("Index: {}".format(index))
+        # print("line: {}".format(line))
+        # print("Frame Index: {}".format(frame_index))
 
         # added by me
         if "s" in self.frame_idxs:    
