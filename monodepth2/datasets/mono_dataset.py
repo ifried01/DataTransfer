@@ -18,12 +18,14 @@ from torchvision import transforms
 
 # returns a converted copy of the image
 # this is how images get read in from the dataset (wrapped inside of self.get_color(), implemented in the subclass (ex. BRONCHDataset))
-def pil_loader(path):
+def pil_loader(path, width, height):
     # open path as file to avoid ResourceWarning
     # (https://github.com/python-pillow/Pillow/issues/835)
     with open(path, 'rb') as f:
         with Image.open(f) as img:
-            return img.convert('RGB')
+            img = img.resize((width, height))
+            img = img.convert('RGB')
+            return img
 
 
 class MonoDataset(data.Dataset):
