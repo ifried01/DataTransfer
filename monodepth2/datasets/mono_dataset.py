@@ -109,7 +109,6 @@ class MonoDataset(data.Dataset):
             if "color" in k:
                 n, im, i = k
                 inputs[(n, im, i)] = self.to_tensor(f)
-                print("H3: {}".format(color_aug))
                 inputs[(n + "_aug", im, i)] = self.to_tensor(color_aug(f))
 
     def __len__(self):
@@ -204,11 +203,9 @@ class MonoDataset(data.Dataset):
             inputs[("inv_K", scale)] = torch.from_numpy(inv_K)
 
         if do_color_aug:
-            color_aug = transforms.ColorJitter.get_params(self.brightness, self.contrast, self.saturation, self.hue)
-            # print("H1: {}".format(color_aug))
+            color_aug = transforms.ColorJitter(self.brightness, self.contrast, self.saturation, self.hue)
         else:
             color_aug = (lambda x: x)
-            # print("H2: {}".format(color_aug))
 
         self.preprocess(inputs, color_aug)
 
