@@ -125,7 +125,7 @@ class Trainer:
         else:
             train_filenames = readlines(fpath.format("monodepth2_mono_train_list.txt"))
 
-        val_filenames = [x for x in os.listdir(fpath.format("VirtualBronchoscopies/test")) if "-l-" in x]
+        val_filenames = [x for x in os.listdir(fpath.format("VirtualBronchoscopies/val")) if "-l-" in x]
         img_ext = '.png' if self.opt.png else '.jpg'
 
         num_train_samples = len(train_filenames)
