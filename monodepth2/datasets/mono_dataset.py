@@ -160,17 +160,29 @@ class MonoDataset(data.Dataset):
         print("line: {}".format(line))
         print("Frame Index: {}".format(frame_index))
 
-        for i in self.frame_idxs:
+
+        # added by me
+        if "s" in self.frame_idxs:    
             # stereo
             # uses left/right image pairs
             # gets appended to frame_idxs in trainer.py
-            if i == "s":
-                other_side = {"r": "l", "l": "r"}[side]
-                inputs[("color", i, -1)] = self.get_color(folder, frame_index, other_side, do_flip)
-            # monocular
-            # uses sequence of image-before, current-image, next-image
-            else:
-                inputs[("color", i, -1)] = self.get_color(folder, frame_index + i, side, do_flip)
+            inputs[("color", i, -1)] = self.get_color(folder, frame_index, side, do_flip)
+            # read other correspondong image
+            other_side = {"r": "l", "l": "r"}[side]
+            inputs[("color", i, -1)] = self.get_color(folder, frame_index, other_side, do_flip)
+        # original code
+        else:
+            for i in self.frame_idxs:
+                # stereo
+                # uses left/right image pairs
+                # gets appended to frame_idxs in trainer.py
+                if i == "s":
+                    other_side = {"r": "l", "l": "r"}[side]
+                    inputs[("color", i, -1)] = self.get_color(folder, frame_index, other_side, do_flip)
+                # monocular
+                # uses sequence of image-before, current-image, next-image
+                else:
+                    inputs[("color", i, -1)] = self.get_color(folder, frame_index + i, side, do_flip)
 
         # adjusting intrinsics to match each scale in the pyramid
         for scale in range(self.num_scales):

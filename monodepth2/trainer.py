@@ -25,9 +25,6 @@ import datasets
 import networks
 from IPython import embed
 
-print("*********\n******** {} ************\n******".format(np.__version__))
-print("*********\n******** {} ************\n******".format(torch.__version__))
-
 class Trainer:
     def __init__(self, options):
         self.opt = options
