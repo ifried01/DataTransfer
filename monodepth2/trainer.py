@@ -121,7 +121,7 @@ class Trainer:
         if self.opt.use_stereo:
             train_filenames = [x for x in os.listdir(fpath.format("train")) if "-l-" in x]
         else:
-            train_filenames = readlines(fpath.format("train"))
+            train_filenames = readlines(fpath.format("train/monodepth2_mono_train_list.txt"))
 
         val_filenames = [x for x in os.listdir(fpath.format("test")) if "-l-" in x]
         img_ext = '.png' if self.opt.png else '.jpg'
