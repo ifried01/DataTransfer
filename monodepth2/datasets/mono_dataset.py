@@ -204,8 +204,10 @@ class MonoDataset(data.Dataset):
 
         if do_color_aug:
             color_aug = transforms.ColorJitter.get_params(self.brightness, self.contrast, self.saturation, self.hue)
+            print("H1: {}".format(color_aug))
         else:
             color_aug = (lambda x: x)
+            print("H2: {}".format(color_aug))
 
         self.preprocess(inputs, color_aug)
 
