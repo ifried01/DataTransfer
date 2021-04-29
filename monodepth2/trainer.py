@@ -116,10 +116,14 @@ class Trainer:
         self.dataset = datasets_dict[self.opt.dataset]
 
         # fpath = os.path.join(os.path.dirname(__file__), "splits", self.opt.split, "{}_files.txt")
-        fpath = os.path.join(os.path.dirname(__file__), "../SampleF30DepthData/monodepth2_data/VirtualBronchoscopies/", "{}")
+        fpath = os.path.join(os.path.dirname(__file__), "../SampleF30DepthData/monodepth2_data_filtered/VirtualBronchoscopies/", "{}")
 
-        train_filenames = [x for x in os.listdir(fpath.format("train")) if "-l-" in x]
-        val_filenames = [x for x in os.listdir(fpath.format("val")) if "-l-" in x]
+        if self.opt.use_stereo:
+            train_filenames = [x for x in os.listdir(fpath.format("train")) if "-l-" in x]
+        else:
+            train_filenames = readlines(fpath.format("train"))
+
+        val_filenames = [x for x in os.listdir(fpath.format("test")) if "-l-" in x]
         img_ext = '.png' if self.opt.png else '.jpg'
 
         num_train_samples = len(train_filenames)
