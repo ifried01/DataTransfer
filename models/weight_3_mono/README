@@ -1,0 +1,226 @@
+import os
+
+!pip install tensorboardX
+
+!git clone https://github.com/ifried01/DataTransfer.git
+
+os.chdir('./DataTransfer/monodepth2/')
+
+!python train.py --data_path ../SampleF30DepthData/monodepth2_data_filtered/ --model_name mono_bronch_mono --height 480 --num_workers 1 --num_epochs 4 --batch_size 4
+
+!ls ~/tmp/mono_bronch_mono/models/weights_3
+
+!mkdir models
+
+!cp -r ~/tmp/mono_bronch_mono/models/weights_3/ models/.
+
+!ls models/weights_3
+
+
+
+
+from __future__ import absolute_import, division, print_function
+%matplotlib inline
+
+import os
+import numpy as np
+import PIL.Image as pil
+import matplotlib.pyplot as plt
+
+import torch
+from torchvision import transforms
+
+import networks
+from utils import download_model_if_doesnt_exist
+
+
+
+
+# model_name = "mono_640x192"
+model_name = "weights_3"
+
+# download_model_if_doesnt_exist(model_name)
+encoder_path = os.path.join("models", model_name, "encoder.pth")
+depth_decoder_path = os.path.join("models", model_name, "depth.pth")
+
+# LOADING PRETRAINED MODEL
+encoder = networks.ResnetEncoder(18, False)
+depth_decoder = networks.DepthDecoder(num_ch_enc=encoder.num_ch_enc, scales=range(4))
+
+loaded_dict_enc = torch.load(encoder_path, map_location='cpu')
+filtered_dict_enc = {k: v for k, v in loaded_dict_enc.items() if k in encoder.state_dict()}
+encoder.load_state_dict(filtered_dict_enc)
+
+loaded_dict = torch.load(depth_decoder_path, map_location='cpu')
+depth_decoder.load_state_dict(loaded_dict)
+
+encoder.eval()
+depth_decoder.eval();
+
+
+
+
+
+image_path = "../SampleF30DepthData/monodepth2_data_filtered/VirtualBronchoscopies/val/photo-l-52.jpg"
+
+input_image = pil.open(image_path).convert('RGB')
+original_width, original_height = input_image.size
+
+feed_height = loaded_dict_enc['height']
+feed_width = loaded_dict_enc['width']
+input_image_resized = input_image.resize((feed_width, feed_height), pil.LANCZOS)
+
+input_image_pytorch = transforms.ToTensor()(input_image_resized).unsqueeze(0)
+
+
+
+
+
+with torch.no_grad():
+    features = encoder(input_image_pytorch)
+    outputs = depth_decoder(features)
+
+disp = outputs[("disp", 0)]
+
+
+
+
+
+disp_resized = torch.nn.functional.interpolate(disp,
+    (original_height, original_width), mode="bilinear", align_corners=False)
+
+# Saving colormapped depth image
+disp_resized_np = disp_resized.squeeze().cpu().numpy()
+vmax = np.percentile(disp_resized_np, 95)
+
+plt.figure(figsize=(10, 10))
+plt.subplot(211)
+plt.imshow(input_image)
+plt.title("Input", fontsize=22)
+plt.axis('off')
+
+plt.subplot(212)
+plt.imshow(disp_resized_np, cmap='magma', vmax=vmax)
+plt.title("Disparity prediction", fontsize=22)
+plt.axis('off');
+
+
+
+
+
+
+
+# and poses were generated as follows
+
+pose_encoder_path = os.path.join("models", model_name, "pose_encoder.pth")
+pose_decoder_path = os.path.join("models", model_name, "pose.pth")
+
+pose_encoder = networks.ResnetEncoder(18, False, 2)
+pose_encoder.load_state_dict(torch.load(pose_encoder_path))
+
+pose_decoder = networks.PoseDecoder(pose_encoder.num_ch_enc, 1, 2)
+pose_decoder.load_state_dict(torch.load(pose_decoder_path))
+
+
+
+pose_encoder.cuda()
+pose_encoder.eval()
+pose_decoder.cuda()
+pose_decoder.eval()
+
+
+
+
+frame_ids = [0, 1]
+
+
+
+
+
+import re
+
+def tryint(s):
+    try:
+        return int(s)
+    except:
+        return s
+
+def alphanum_key(s):
+    """ Turn a string into a list of string and number chunks.
+        "z23a" -> ["z", 23, "a"]
+    """
+    return [ tryint(c) for c in re.split('([0-9]+)', s) ]
+
+def sort_nicely(l):
+    """ Sort the given list in the way that humans expect.
+    """
+    l.sort(key=alphanum_key)
+
+
+
+
+
+height = 480
+width = 640
+batch_size = 4
+num_workers = 1
+fpath = os.path.join("../SampleF30DepthData/monodepth2_data_filtered/", "{}")
+filenames = [x for x in os.listdir(fpath.format("VirtualBronchoscopies/val")) if "-l-" in x]
+sort_nicely(filenames)
+
+
+
+
+data_path = "../SampleF30DepthData/monodepth2_data_filtered/"
+
+
+
+import torch
+import datasets
+
+
+
+from torch.utils.data import DataLoader
+
+
+
+dataset = datasets.BRONCHDepthDataset(data_path, "val", filenames, height, width, [0, 1], 4, is_train=False)
+dataloader = DataLoader(dataset, batch_size, shuffle=False,num_workers=num_workers, pin_memory=True, drop_last=False)
+
+
+from layers import transformation_from_parameters
+
+
+
+pred_poses = []
+
+
+my_counter = 0 
+with torch.no_grad():
+  for inputs in dataloader:
+      for key, ipt in inputs.items():
+          inputs[key] = ipt.cuda()
+
+      print(my_counter)
+
+      if my_counter == 82:
+        break
+
+      my_counter += 1
+
+      all_color_aug = torch.cat([inputs[("color_aug", i, 0)] for i in frame_ids], 1)
+
+      features = [pose_encoder(all_color_aug)]
+      axisangle, translation = pose_decoder(features)
+
+      pred_poses.append(transformation_from_parameters(axisangle[:, 0], translation[:, 0]).cpu().numpy())
+
+pred_poses = np.concatenate(pred_poses)
+
+import numpy as np
+
+
+np.save("poses_val_mono", pred_poses)
+
+
+
