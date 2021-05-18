@@ -148,6 +148,8 @@ class MonoDataset(data.Dataset):
         line = self.filenames[index].rstrip(".jpg").split("-")
         folder = self.foldername
 
+        print("*************** HEREEEEWR *************")
+
         if len(line) == 3:
             side = line[1]
         else:

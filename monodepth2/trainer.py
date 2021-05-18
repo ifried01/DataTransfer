@@ -129,16 +129,18 @@ class Trainer:
         img_ext = '.png' if self.opt.png else '.jpg'
 
         num_train_samples = len(train_filenames)
-        
-        print(num_train_samples)
-        print(self.opt.data_path)
 
         self.num_total_steps = num_train_samples // self.opt.batch_size * self.opt.num_epochs
 
         train_dataset = self.dataset(
             self.opt.data_path, "train", train_filenames, self.opt.height, self.opt.width,
             self.opt.frame_ids, 4, is_train=True, img_ext=img_ext)
+
         print("HERE: {}".format(train_dataset.data_path))
+        print("HERE: {}".format(train_dataset.data_path))
+        print("HERE: {}".format(train_dataset.data_path))
+        print("HERE: {}".format(train_dataset.data_path))
+        
         self.train_loader = DataLoader(
             train_dataset, self.opt.batch_size, True,
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
