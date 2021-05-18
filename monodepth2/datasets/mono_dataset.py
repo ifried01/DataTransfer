@@ -179,6 +179,7 @@ class MonoDataset(data.Dataset):
             inputs[("color", i, -1)] = self.get_color(folder, frame_index, other_side, do_flip)
         # original code
         else:
+            print("******** HERE *************")
             for i in self.frame_idxs:
                 # stereo
                 # uses left/right image pairs
