@@ -25,7 +25,7 @@ class BRONCHDataset(MonoDataset):
         # calculating the camera intrinsic matrix for the Ambu bronchoscope
         # https://codeyarns.com/tech/2015-09-08-how-to-compute-intrinsic-camera-matrix-for-a-camera.html
         # w = 640 (virtual images I created were 640, but Ambu videos are 560)
-        w = 560
+        w = 544
         h = 480
         x = w / 2
         y = h / 2
@@ -64,13 +64,14 @@ class BRONCHDepthDataset(BRONCHDataset):
     def get_image_path(self, folder, frame_index, side):
         # image_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "photo-{}-{}{}".format(side, frame_index, self.img_ext))
         image_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "out-{}{}".format(side, frame_index, self.img_ext))
-        print(image_path)
+        # print(image_path)
         return image_path
 
     def get_depth(self, folder, frame_index, side, do_flip):
         # f_str = "{:010d}.png".format(frame_index)
         # depth_path = os.path.join(self.data_path, "DepthPhotos", folder, "DepthPhotos/groundtruth/image_0{}".format(self.side_map[side]), f_str)
-        depth_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "photo-{}-{}{}".format(side, frame_index, self.img_ext))
+        # depth_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "photo-{}-{}{}".format(side, frame_index, self.img_ext))
+        image_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "out-{}{}".format(side, frame_index, self.img_ext))
         depth_gt = pil.open(depth_path)
         depth_gt = depth_gt.resize(self.full_res_shape, pil.NEAREST)
         depth_gt = np.array(depth_gt).astype(np.float32) / 256
