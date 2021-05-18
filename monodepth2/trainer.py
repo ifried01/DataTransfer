@@ -139,8 +139,6 @@ class Trainer:
             train_dataset, self.opt.batch_size, True,
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
 
-        print(val_filenames)
-
         val_dataset = self.dataset(
             self.opt.data_path, "val", val_filenames, self.opt.height, self.opt.width,
             self.opt.frame_ids, 4, is_train=False, img_ext=img_ext)
@@ -233,7 +231,7 @@ class Trainer:
                     self.compute_depth_losses(inputs, outputs, losses)
 
                 self.log("train", inputs, outputs, losses)
-                self.val()
+                # self.val()
 
             self.step += 1
 
