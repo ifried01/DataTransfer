@@ -129,6 +129,10 @@ class Trainer:
         img_ext = '.png' if self.opt.png else '.jpg'
 
         num_train_samples = len(train_filenames)
+        
+        print(num_train_samples)
+        print(self.opt.data_path)
+
         self.num_total_steps = num_train_samples // self.opt.batch_size * self.opt.num_epochs
 
         train_dataset = self.dataset(
