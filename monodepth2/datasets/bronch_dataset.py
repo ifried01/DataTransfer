@@ -64,6 +64,7 @@ class BRONCHDepthDataset(BRONCHDataset):
     def get_image_path(self, folder, frame_index, side):
         # image_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "photo-{}-{}{}".format(side, frame_index, self.img_ext))
         image_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "out-{}{}".format(side, frame_index, self.img_ext))
+        print(image_path)
         return image_path
 
     def get_depth(self, folder, frame_index, side, do_flip):
