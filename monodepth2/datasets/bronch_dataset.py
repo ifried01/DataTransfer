@@ -24,11 +24,12 @@ class BRONCHDataset(MonoDataset):
 
         # calculating the camera intrinsic matrix for the Ambu bronchoscope
         # https://codeyarns.com/tech/2015-09-08-how-to-compute-intrinsic-camera-matrix-for-a-camera.html
-        w = 640
+        # w = 640 (virtual images I created were 640, but Ambu videos are 560)
+        w = 560
         h = 480
         x = w / 2
         y = h / 2
-        fov = 85
+        fov = 85 # from aScope+4+Broncho+Regular+Datasheet.pdf
         f_x = x / np.tan((fov/2) * (math.pi / 180))
         f_y = y / np.tan((fov/2) * (math.pi / 180))
 
@@ -61,7 +62,8 @@ class BRONCHDepthDataset(BRONCHDataset):
         super(BRONCHDepthDataset, self).__init__(*args, **kwargs)
 
     def get_image_path(self, folder, frame_index, side):
-        image_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "photo-{}-{}{}".format(side, frame_index, self.img_ext))
+        # image_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "photo-{}-{}{}".format(side, frame_index, self.img_ext))
+        image_path = os.path.join(self.data_path, "VirtualBronchoscopies", folder, "out-{}{}".format(side, frame_index, self.img_ext))
         return image_path
 
     def get_depth(self, folder, frame_index, side, do_flip):
