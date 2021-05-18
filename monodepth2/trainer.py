@@ -137,8 +137,8 @@ class Trainer:
             self.opt.frame_ids, 4, is_train=True, img_ext=img_ext)
 
         print("HERE: {}".format(train_dataset.data_path))
-        print("HERE: {}".format(train_dataset.data_path))
-        print("HERE: {}".format(train_dataset.data_path))
+        print("HERE: {}".format(train_dataset.foldername))
+        print("HERE: {}".format(train_dataset.filenames))
         print("HERE: {}".format(train_dataset.data_path))
         
         self.train_loader = DataLoader(
