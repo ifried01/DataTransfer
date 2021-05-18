@@ -140,8 +140,7 @@ class MonoDataset(data.Dataset):
             2       images resized to (self.width // 4, self.height // 4)
             3       images resized to (self.width // 8, self.height // 8)
         """
-        print("*************** HEREEEEWR *************")
-        
+
         inputs = {}
 
         do_color_aug = self.is_train and random.random() > 0.5

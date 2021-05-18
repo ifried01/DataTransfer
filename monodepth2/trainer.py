@@ -135,13 +135,9 @@ class Trainer:
         train_dataset = self.dataset(
             self.opt.data_path, "train", train_filenames, self.opt.height, self.opt.width,
             self.opt.frame_ids, 4, is_train=True, img_ext=img_ext)
-
-        print("HERE: {}".format(train_dataset.data_path))
-        print("HERE: {}".format(train_dataset.foldername))
-        print("HERE: {}".format(train_dataset.filenames))
-        print("HERE: {}".format(train_dataset.data_path))
-        
-        self.train_loader = DataLoader(train_dataset, self.opt.batch_size, True, num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
+        self.train_loader = DataLoader(
+            train_dataset, self.opt.batch_size, True,
+            num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
 
         val_dataset = self.dataset(
             self.opt.data_path, "val", val_filenames, self.opt.height, self.opt.width,
@@ -149,6 +145,7 @@ class Trainer:
         self.val_loader = DataLoader(
             val_dataset, self.opt.batch_size, True,
             num_workers=self.opt.num_workers, pin_memory=True, drop_last=True)
+        
         self.val_iter = iter(self.val_loader)
 
         self.writers = {}
