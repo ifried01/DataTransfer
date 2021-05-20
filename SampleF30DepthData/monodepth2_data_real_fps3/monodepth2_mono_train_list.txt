@@ -1,4 +1,3 @@
-photo-l-0.jpg
 photo-l-1.jpg
 photo-l-2.jpg
 photo-l-3.jpg
@@ -492,4 +491,3 @@ photo-l-490.jpg
 photo-l-491.jpg
 photo-l-492.jpg
 photo-l-493.jpg
-photo-l-494.jpg
