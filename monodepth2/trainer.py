@@ -117,10 +117,10 @@ class Trainer:
 
         # fpath = os.path.join(os.path.dirname(__file__), "splits", self.opt.split, "{}_files.txt")
 
-        fpath = os.path.join(os.path.dirname(__file__), "../SampleF30DepthData/monodepth2_data_real/", "{}")
+        fpath = os.path.join(os.path.dirname(__file__), "../SampleF30DepthData/monodepth2_data_real_fps3/", "{}")
         
         if self.opt.use_stereo:
-            fpath = os.path.join(os.path.dirname(__file__), "../SampleF30DepthData/monodepth2_data_real//", "{}")
+            fpath = os.path.join(os.path.dirname(__file__), "../SampleF30DepthData/monodepth2_data_real_fps3//", "{}")
             train_filenames = [x for x in os.listdir(fpath.format("VirtualBronchoscopies/train")) if "-l-" in x]
         else:
             train_filenames = readlines(fpath.format("monodepth2_mono_train_list.txt"))
