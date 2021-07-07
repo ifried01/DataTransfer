@@ -24,7 +24,7 @@ class BRONCHDataset(MonoDataset):
 
         # calculating the camera intrinsic matrix for the Ambu bronchoscope
         # https://codeyarns.com/tech/2015-09-08-how-to-compute-intrinsic-camera-matrix-for-a-camera.html
-        # w = 640 (virtual images I created were 640, but Ambu videos are 560)
+        # w = 640 (virtual images I created were 640, but Ambu videos are 560) (544 so divisible by 32 as required by monodepth2)
         w = 544
         h = 480
         x = w / 2

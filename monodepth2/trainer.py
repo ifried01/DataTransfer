@@ -364,8 +364,7 @@ class Trainer:
             if self.opt.v1_multiscale:
                 source_scale = scale
             else:
-                disp = F.interpolate(
-                    disp, [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
+                disp = F.interpolate(disp, [self.opt.height, self.opt.width], mode="bilinear", align_corners=False)
                 source_scale = 0
 
             _, depth = disp_to_depth(disp, self.opt.min_depth, self.opt.max_depth)
@@ -388,13 +387,10 @@ class Trainer:
                     inv_depth = 1 / depth
                     mean_inv_depth = inv_depth.mean(3, True).mean(2, True)
 
-                    T = transformation_from_parameters(
-                        axisangle[:, 0], translation[:, 0] * mean_inv_depth[:, 0], frame_id < 0)
+                    T = transformation_from_parameters(axisangle[:, 0], translation[:, 0] * mean_inv_depth[:, 0], frame_id < 0)
 
-                cam_points = self.backproject_depth[source_scale](
-                    depth, inputs[("inv_K", source_scale)])
-                pix_coords = self.project_3d[source_scale](
-                    cam_points, inputs[("K", source_scale)], T)
+                cam_points = self.backproject_depth[source_scale](depth, inputs[("inv_K", source_scale)])
+                pix_coords = self.project_3d[source_scale](cam_points, inputs[("K", source_scale)], T)
 
                 outputs[("sample", frame_id, scale)] = pix_coords
 
@@ -412,6 +408,9 @@ class Trainer:
         """
         abs_diff = torch.abs(target - pred)
         l1_loss = abs_diff.mean(1, True)
+
+        print("*********HERE*********")
+        print(l1_loss.shape)
 
         if self.opt.no_ssim:
             reprojection_loss = l1_loss

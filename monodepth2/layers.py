@@ -148,26 +148,59 @@ class BackprojectDepth(nn.Module):
 
         meshgrid = np.meshgrid(range(self.width), range(self.height), indexing='xy')
         self.id_coords = np.stack(meshgrid, axis=0).astype(np.float32)
-        self.id_coords = nn.Parameter(torch.from_numpy(self.id_coords),
-                                      requires_grad=False)
+        # I did an example with a 10x6 tensor (height == 10 x width == 6)
+        # Tensor of shape (2, height, width) where Tensor:
+        # [0] is (height, width) with row [0,1,2,3,4,5, ..., width] repeated 10 times
+        # [1] is 10x6 with rows [0,0,0, ..., 0_width], [1,1,1, ..., 1_width], ..., [height,height,height, ...]
+        self.id_coords = nn.Parameter(torch.from_numpy(self.id_coords), requires_grad=False)
 
-        self.ones = nn.Parameter(torch.ones(self.batch_size, 1, self.height * self.width),
-                                 requires_grad=False)
+        # Tensor of shape (batch_size, 1, height*width) of 1's
+        self.ones = nn.Parameter(torch.ones(self.batch_size, 1, self.height * self.width), requires_grad=False)
 
-        self.pix_coords = torch.unsqueeze(torch.stack(
-            [self.id_coords[0].view(-1), self.id_coords[1].view(-1)], 0), 0)
+        # flatten id_coords into shape (1, 2, height*width)
+        self.pix_coords = torch.unsqueeze(torch.stack([self.id_coords[0].view(-1), self.id_coords[1].view(-1)], 0), 0)
+        # repeat pix_coords batch_size times so (batch_size, 2, height*width)
         self.pix_coords = self.pix_coords.repeat(batch_size, 1, 1)
-        self.pix_coords = nn.Parameter(torch.cat([self.pix_coords, self.ones], 1),
-                                       requires_grad=False)
+        # add 'ones' to the end of each matrix, shape is (batch_size, 3, height*width)
+        self.pix_coords = nn.Parameter(torch.cat([self.pix_coords, self.ones], 1), requires_grad=False)
+
+        # pix_coords is a generic matrix that is not dependent on anything other than height, width, and batch_size
+        # it then gets used in 'forward' with respect to inv_K and depth to make it specific to the image data
+        # pix_coords has batch_size number of (3, height*width) tensors, where Tensor:
+        # [0] is [0, 1, 2, 3, ..., width] repeated h times
+        # [1] is [0, 0, 0, 0, ..., 0 width times, 1, 1, 1, ..., 1 width times, 2, 2, 2, ..., ..., height, height, ..., height width times]
+        # [2] is [1,1,1,1,1,... height*width times]
+        # therefore, the columns are [0,0,1], [1,0,1], [2,0,1], ..., [width, 0, 1], [0, 1, 1], [1, 1, 1], [2, 1, 1], ..., [width, 1, 1], [0,2,1], ...
+        # which is every 2D coordinatein the image starting from [0,0] all the way to [width, height, 1] (in homogeneous form)
+        # We then use this generic "image" coordinate Tensor in 'forward' to convert to generic world coordinates (using inv_K) and then
+        # multiply by disparity to get points in the form [X,Y,Z,1]
+
+        # Question:
+            # (1) From Szeliski, it looks like the extrinsic matrix should be required to get world coordinates (page 60), but here they don't use it?
+            # (2) If I know something about a couple points true distance/scale, how can i incorporate it? Would I just need one true point so I can map [X,Y,Z] in the
+            #     camera frame to [X',Y',Z'] in real-wolrd frame and then I know the ratio of X to X', Y to Y', and Z to Z'
+        # Answer:
+            # (1) "the camera is assumed to be located at the origin of a Euclidean coordinate system with the principal axis of the camera pointing straight down the Z-axis"
+            #     so the [X,Y,Z] coordinates are in the camera's frame (and thus have no correct scale)
+            #        - from page 155 in Hartley & Zisserman
+            # (2) Yes, this could work to get scale conversion, and the more points I have correspondance for, the better.
 
     def forward(self, depth, inv_K):
+        # Convert generic image coordinates to generic world coordinates (from [x,y,1] to [X,Y,Z])
+        # Tensor of shape (batch_size, 3, height*width)
         cam_points = torch.matmul(inv_K[:, :3, :3], self.pix_coords)
+        # multiply by depth
+        # Tensor of shape (batch_size, 3, height*width)
         cam_points = depth.view(self.batch_size, 1, -1) * cam_points
+        # Tensor of shape (batch_size, 4, height*width) (points in the form [X,Y,Z,1] (in homogeneous coordinates))
         cam_points = torch.cat([cam_points, self.ones], 1)
 
         return cam_points
 
-
+# I think this corresponds to the 'proj' operator in the paper
+# where 'points' passed into the 'forward' function is made by class BackprojectDepth() which considers the depth map
+# We project the 3D depth from I_t into I_t' through the camera.
+# T is a 4x4 rotation matrix that gets made by using the axis-angle representation and translation outputted by the pose network.
 class Project3D(nn.Module):
     """Layer which projects 3D points into a camera with intrinsics K and at position T
     """
