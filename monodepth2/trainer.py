@@ -410,6 +410,7 @@ class Trainer:
         l1_loss = abs_diff.mean(1, True)
 
         print("*********HERE*********")
+        print(abs_diff.shape)
         print(l1_loss.shape)
 
         if self.opt.no_ssim:
